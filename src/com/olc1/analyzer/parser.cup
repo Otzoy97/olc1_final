@@ -167,7 +167,6 @@ OPER ::= OPER:o1 MAS OPER:o2 {:
         System.out.println("restó");
     }
     o1.setConcatenado(o1.getConcatenado() + " "+  o2.getConcatenado() + " - " );
-    
     RESULT = o1;
 :}
 | OPER:o1 PRODUCTO OPER:o2 {:
@@ -255,7 +254,6 @@ OPER ::= OPER:o1 MAS OPER:o2 {:
         System.out.println("dividió");
     }
     o1.setConcatenado(o1.getConcatenado() + " "+  o2.getConcatenado() + " / " );
-    
     RESULT = o1;
 :}
 | ENTERO:a {:
