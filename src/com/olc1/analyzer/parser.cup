@@ -1,0 +1,288 @@
+package com.olc1.analyzer;
+
+import java.util.LinkedList;
+parser code{:
+    public LinkedList<LinkedList<Nodo>> resultado;
+
+    public String getCadena(String cadena){
+        return cadena.substring(1,cadena.length()-1);
+    }
+:}
+
+action code{::}
+
+terminal String ENTERO, CADENA, REAL, SEMICOLON, COMMA;
+terminal String MAS, MENOS, PRODUCTO, DIVISION, TRUE, FALSE;
+
+non terminal INICIO;
+non terminal Nodo OPER;
+non terminal LinkedList<LinkedList<Nodo>> CUERPO;
+non terminal LinkedList<Nodo> Operlst;
+
+precedence left MAS, MENOS;
+precedence left DIVISION, PRODUCTO;
+
+start with INICIO;
+
+INICIO ::= CUERPO:a {:resultado = a; :};
+
+CUERPO::= CUERPO:lst  Operlst:a  SEMICOLON {:
+    lst.add(a);
+    RESULT = lst;
+:} 
+| Operlst:a  SEMICOLON {:
+    LinkedList<LinkedList<Nodo>> lstnod = new LinkedList<LinkedList<Nodo>>();
+    lstnod.add(a);
+    RESULT = lstnod;
+:};
+
+Operlst::= Operlst:lst COMMA OPER:o2{:
+try{
+    if(lst.peekLast().esString || o2.esString){
+        lst.add(o2);
+    } else
+    if(lst.peekLast().esDouble && o2.esDouble){
+        int retorno = (int) Math.round( ((double) lst.peekLast().getResultado()) + ((double) o2.getResultado()) );
+        lst.peekLast().setResultado(retorno);
+        lst.peekLast().esString = false;
+        lst.peekLast().esDouble = false;
+        lst.peekLast().esEntero = true;
+    } else 
+    if(lst.peekLast().esDouble && o2.esEntero){
+        Double retorno = ((double) lst.peekLast().getResultado()) + ( (int) o2.getResultado());
+        lst.peekLast().setResultado(retorno);
+        lst.peekLast().esString = false;
+        lst.peekLast().esDouble = true;
+        lst.peekLast().esEntero = false;
+    } else
+    if(lst.peekLast().esEntero && o2.esDouble){
+        Double retorno = ((int) lst.peekLast().getResultado()) + ( (double) o2.getResultado());
+        lst.peekLast().setResultado(retorno);
+        lst.peekLast().esString = false;
+        lst.peekLast().esDouble = true;
+        lst.peekLast().esEntero = false;
+        System.out.println("multiplicó");
+    } else
+    if (lst.peekLast().esEntero && o2.esEntero){
+        int retorno = ((int) lst.peekLast().getResultado()) + ( (int) o2.getResultado());
+        lst.peekLast().setResultado( retorno );
+        lst.peekLast().esString = false;
+        lst.peekLast().esDouble = false;
+        lst.peekLast().esEntero = true;
+    }
+} catch (Exception ex) {
+    System.out.println(ex.getMessage());
+}
+    //lst.peekLast().setConcatenado(lst.peekLast().getConcatenado() + ", "+  o2.getConcatenado());
+    RESULT = lst;
+:}
+| OPER:o1 {:
+    LinkedList<Nodo> nodolst = new LinkedList<Nodo>();
+    nodolst.add(o1);
+    RESULT =nodolst;
+:};
+
+OPER ::= OPER:o1 MAS OPER:o2 {:
+    if(o1.esString || o2.esString){
+        o1.setResultado(String.valueOf(o1.getResultado()) +" "+  String.valueOf(o2.getResultado())+"");
+        o1.esString = true;
+        o1.esDouble = false;
+        o1.esEntero = false;
+        System.out.println("sumó");
+    } else
+    if(o1.esDouble && o2.esDouble){
+        int retorno = (int) Math.round( ((double) o1.getResultado()) + ((double) o2.getResultado()) );
+        o1.setResultado(retorno);
+        o1.esString = false;
+        o1.esDouble = false;
+        o1.esEntero = true;
+        System.out.println("sumó");
+    } else 
+    if(o1.esDouble && o2.esEntero){
+        Double retorno = ((double) o1.getResultado()) + ( (int) o2.getResultado());
+        o1.setResultado(retorno);
+        o1.esString = false;
+        o1.esDouble = true;
+        o1.esEntero = false;
+        System.out.println("sumó");
+    } else
+    if(o1.esEntero && o2.esDouble){
+        Double retorno = ((int) o1.getResultado()) + ( (double) o2.getResultado());
+        o1.setResultado(retorno);
+        o1.esString = false;
+        o1.esDouble = true;
+        o1.esEntero = false;
+        System.out.println("multiplicó");
+    } else
+    if (o1.esEntero && o2.esEntero){
+        int retorno = ((int) o1.getResultado()) + ( (int) o2.getResultado());
+        o1.setResultado( retorno );
+        o1.esString = false;
+        o1.esDouble = false;
+        o1.esEntero = true;
+        System.out.println("sumó");
+    }
+    o1.setConcatenado(o1.getConcatenado() + " "+  o2.getConcatenado() + " + " );
+    
+    RESULT = o1;
+:}
+| OPER:o1 MENOS OPER:o2 {:
+    if(o1.esString || o2.esString){
+        o1.setResultado(String.valueOf(o1.getResultado()) +" "+ String.valueOf(o2.getResultado())+" - ");
+        o1.esString = true;
+        o1.esDouble = false;
+        o1.esEntero = false;
+        System.out.println("restó");
+    } else
+    if(o1.esDouble && o2.esDouble){
+        int retorno = (int) Math.round( ((double) o1.getResultado()) - ((double) o2.getResultado()) );
+        o1.setResultado(retorno);
+        o1.esString = false;
+        o1.esDouble = false;
+        o1.esEntero = true;
+        System.out.println("restó");
+    } else 
+    if(o1.esDouble && o2.esEntero){
+        Double retorno = ((double) o1.getResultado()) - ( (int) o2.getResultado());
+        o1.setResultado(retorno);
+        o1.esString = false;
+        o1.esDouble = true;
+        o1.esEntero = false;
+        System.out.println("restó");
+    } else
+    if(o1.esEntero && o2.esDouble){
+        Double retorno = ((int) o1.getResultado()) - ( (double) o2.getResultado());
+        o1.setResultado(retorno);
+        o1.esString = false;
+        o1.esDouble = true;
+        o1.esEntero = false;
+        System.out.println("multiplicó");
+    } else
+    if (o1.esEntero && o2.esEntero){
+        int retorno = ((int) o1.getResultado()) - ( (int) o2.getResultado());
+        o1.setResultado( retorno );
+        o1.esString = false;
+        o1.esDouble = false;
+        o1.esEntero = true;
+        System.out.println("restó");
+    }
+    o1.setConcatenado(o1.getConcatenado() + " "+  o2.getConcatenado() + " - " );
+    
+    RESULT = o1;
+:}
+| OPER:o1 PRODUCTO OPER:o2 {:
+    if(o1.esString || o2.esString){
+        o1.setResultado(String.valueOf(o1.getResultado()) +" "+ String.valueOf(o2.getResultado())+" * ");
+        o1.esString = true;
+        o1.esDouble = false;
+        o1.esEntero = false;
+        System.out.println("multiplicó");
+    } else
+    if(o1.esDouble && o2.esDouble){
+        int retorno = (int) Math.round( ((double) o1.getResultado()) * ((double) o2.getResultado()) );
+        o1.setResultado(retorno);
+        o1.esString = false;
+        o1.esDouble = false;
+        o1.esEntero = true;
+        System.out.println("multiplicó");
+    } else 
+    if(o1.esDouble && o2.esEntero){
+        Double retorno = ((double) o1.getResultado()) * ( (int) o2.getResultado());
+        o1.setResultado(retorno);
+        o1.esString = false;
+        o1.esDouble = true;
+        o1.esEntero = false;
+        System.out.println("multiplicó");
+    } else
+    if(o1.esEntero && o2.esDouble){
+        Double retorno = ((int) o1.getResultado()) * ( (double) o2.getResultado());
+        o1.setResultado(retorno);
+        o1.esString = false;
+        o1.esDouble = true;
+        o1.esEntero = false;
+        System.out.println("multiplicó");
+    } else
+    if (o1.esEntero && o2.esEntero){
+        int retorno = ((int) o1.getResultado()) * ( (int) o2.getResultado());
+        o1.setResultado( retorno );
+        o1.esString = false;
+        o1.esDouble = false;
+        o1.esEntero = true;
+        System.out.println("multiplicó");
+    }
+    o1.setConcatenado(o1.getConcatenado() + " "+  o2.getConcatenado() + " * " );
+    
+    RESULT = o1;
+:}
+| OPER:o1 DIVISION OPER:o2 {:
+    if(o1.esString || o2.esString){
+        o1.setResultado(String.valueOf(o1.getResultado()) +" "+ String.valueOf(o2.getResultado())+" / ");
+        o1.esString = true;
+        o1.esDouble = false;
+        o1.esEntero = false;
+        System.out.println("dividió");
+    } else
+    if(o1.esDouble && o2.esDouble){
+        int retorno = (int) Math.round( ((double) o1.getResultado()) / ((double) o2.getResultado()) );
+        o1.setResultado(retorno);
+        o1.esString = false;
+        o1.esDouble = false;
+        o1.esEntero = true;
+        System.out.println("dividió");
+    } else 
+    if(o1.esDouble && o2.esEntero){
+        Double retorno = ((double) o1.getResultado()) / ( (int) o2.getResultado());
+        o1.setResultado(retorno);
+        o1.esString = false;
+        o1.esDouble = true;
+        o1.esEntero = false;
+        System.out.println("dividió");
+    } else
+    if(o1.esEntero && o2.esDouble){
+        Double retorno = ((int) o1.getResultado()) / ( (double) o2.getResultado());
+        o1.setResultado(retorno);
+        o1.esString = false;
+        o1.esDouble = true;
+        o1.esEntero = false;
+        System.out.println("multiplicó");
+    } else
+    if (o1.esEntero && o2.esEntero){
+        int retorno = ((int) o1.getResultado()) / ( (int) o2.getResultado());
+        o1.setResultado( retorno );
+        o1.esString = false;
+        o1.esDouble = false;
+        o1.esEntero = true;
+        System.out.println("dividió");
+    }
+    o1.setConcatenado(o1.getConcatenado() + " "+  o2.getConcatenado() + " / " );
+    
+    RESULT = o1;
+:}
+| ENTERO:a {:
+    int int01 = 0;
+    try{
+        int01 = Integer.parseInt(a);
+    } catch (Exception ex){
+        System.out.println(ex.getMessage());
+    }
+    RESULT = new Nodo(int01);
+:}
+| CADENA:a {:
+    RESULT = new Nodo(a);
+:}
+| TRUE:a {:
+    RESULT = new Nodo(a);
+:}
+| FALSE:a {:
+    RESULT = new Nodo(a);
+:}
+| REAL:a {:
+    Double double01 = 0.0;
+    try{
+        double01 = Double.parseDouble(a);
+    } catch (Exception ex){
+        System.out.println(ex.getMessage());
+    }
+    RESULT = new Nodo(double01);
+:};
+
